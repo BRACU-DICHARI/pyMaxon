@@ -66,3 +66,76 @@ class Maxon():
 
         return self.p_baud_rate.value, self.p_time_out.value
 
+    def close_all_devices(self):
+
+        self.ret_val = self.epos.VCS_CloseAllDevices(byref(self.p_error_code))
+
+        if not self.ret_val:
+
+            return -1
+
+        if self.p_error_code != 0:
+            return self.p_error_code  # TODO ritorna l'errore in base al numero restituito (crea una funzione apposita)
+
+        return 0
+
+    def close_device(self):
+
+        self.ret_val = self.epos.VCS_CloseDevice(self.key_handle, byref(self.p_error_code))
+
+        if not self.ret_val:
+
+            return -1
+
+        if self.p_error_code != 0:
+            return self.p_error_code  # TODO ritorna l'errore in base al numero restituito (crea una funzione apposita)
+
+        return 0
+
+    def open_sub_device(self, device_name, protocol_stack_name):
+
+        sub_key_handle = 0
+        sub_p_error_code = c_uint(0)
+        sub_device_name = c_char_p(device_name.encode('ascii'))
+        sub_protocol_stack_name = c_char_p(protocol_stack_name.encode('ascii'))
+
+        sub_key_handle = self.epos.OpenSubDevice(self.key_handle, sub_device_name, sub_protocol_stack_name,
+                                                 byref(sub_p_error_code))
+
+        if sub_key_handle == 0:
+
+            raise Exception("Error! Can't open device")
+
+        if sub_p_error_code != 0:
+
+            return sub_p_error_code    # TODO ritorna l'errore in base al numero restituito (crea una funzione apposita)
+
+        return sub_key_handle   # TODO check if is correct
+
+    def set_gateway_settings(self, baud_rate):
+
+        self.ret_val = self.epos.VCS_SetGatewaySettings(self.key_handle, c_uint(baud_rate), byref(self.p_error_code))
+
+        if not self.ret_val:
+
+            return -1
+
+        if self.p_error_code != 0:
+            return self.p_error_code  # TODO ritorna l'errore in base al numero restituito (crea una funzione apposita)
+
+        return 0
+
+    def get_gateway_settings(self):
+
+        p_baud_rate = c_uint(0)
+
+        self.ret_val = self.epos.VCS_GetGatewaySettings(self.key_handle, byref(p_baud_rate), self.p_error_code)
+
+        if not self.ret_val:
+
+            return -1
+
+        if self.p_error_code != 0:
+            return self.p_error_code  # TODO ritorna l'errore in base al numero restituito (crea una funzione apposita)
+
+        return p_baud_rate.value
