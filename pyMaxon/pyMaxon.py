@@ -139,3 +139,78 @@ class Maxon():
             return self.p_error_code  # TODO ritorna l'errore in base al numero restituito (crea una funzione apposita)
 
         return p_baud_rate.value
+
+    def close_all_sub_devices(self):
+
+        self.ret_val = self.epos.VCS_CloseAllSubDevices(self.key_handle, byref(self.p_error_code))
+
+        if not self.ret_val:
+
+            return -1
+
+        if self.p_error_code != 0:
+            return self.p_error_code  # TODO ritorna l'errore in base al numero restituito (crea una funzione apposita)
+
+    def close_all_sub_device(self):
+
+        self.ret_val = self.epos.VCS_CloseSubDevice(self.key_handle, byref(self.p_error_code))
+
+        if not self.ret_val:
+
+            return -1
+
+        if self.p_error_code != 0:
+            return self.p_error_code  # TODO ritorna l'errore in base al numero restituito (crea una funzione apposita)
+
+    def get_error_info(self, error_code_value, max_str_size):
+
+        """error_code_value deve essere di tipo DWORD (sistema il tipo)
+        max_str_size deve essere di tipo WORD (sistema il tipo)"""
+
+        p_error_info = c_char_p("".encode('ascii'))
+
+        self.ret_val = self.epos.VCS_GetErrorInfo(error_code_value, p_error_info, max_str_size)
+
+        if not self.ret_val:
+
+            return -1
+
+        if self.p_error_code != 0:
+            return self.p_error_code  # TODO ritorna l'errore in base al numero restituito (crea una funzione apposita)
+
+    def get_driver_info(self, max_str_name_size, max_str_version_size):
+
+        p_library_name = c_char_p("".encode('ascii'))
+        p_library_version = c_char_p("".encode('ascii'))
+
+        self.ret_val = self.epos.VCS_GetDriverInfo(p_library_name, max_str_name_size, p_library_version,
+                                                   max_str_version_size)
+
+        if not self.ret_val:
+
+            return -1
+
+        if self.p_error_code != 0:
+            return self.p_error_code  # TODO ritorna l'errore in base al numero restituito (crea una funzione apposita)
+
+        return p_library_name, p_library_version
+
+    def get_version(self):
+
+        p_hw_version = c_uint(0)
+        p_sw_version = c_uint(0)
+        p_application_number = c_uint(0)
+        p_application_version = c_uint(0)
+
+        self.ret_val = self.epos.VCS_GetVersion(self.key_handle, self.node_id, byref(p_hw_version), byref(p_sw_version),
+                                                byref(p_application_number), byref(p_application_version),
+                                                byref(self.p_error_code))
+
+        if not self.ret_val:
+
+            return -1
+
+        if self.p_error_code != 0:
+            return self.p_error_code  # TODO ritorna l'errore in base al numero restituito (crea una funzione apposita)
+
+        return p_hw_version, p_sw_version, p_application_number, p_application_version
